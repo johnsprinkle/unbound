@@ -1,0 +1,69 @@
+version: '3'
+
+env:
+  DOCKER_REPOSITORY: johnsprinkle
+  DOCKER_IMAGE_NAME: unbound
+  DOCKER_CONTAINER_NAME: unbound
+  UNBOUND_PORT: 5053
+  UNBOUND_HOST_PORT: 5053
+  ALLOWED_SUBNET: "172.17.0.0\\/16" #Escaped '/' for sed to do a replacement
+
+tasks:
+  install-go:
+    cmds:
+      - brew install go
+      - brew install golangci-lint
+
+  format:
+    cmds:
+      - go mod tidy
+      - go fmt ./...
+
+  lint:
+    cmds:
+      - golangci-lint run
+
+  build:
+    cmds:
+      - docker build -t $DOCKER_IMAGE_NAME .
+
+  run:
+    cmds:
+      - docker run -e ALLOWED_SUBNET=$ALLOWED_SUBNET -d --rm -p 127.0.0.1:$UNBOUND_HOST_PORT:$UNBOUND_PORT -p 127.0.0.1:$UNBOUND_HOST_PORT:$UNBOUND_PORT/udp --rm --name $DOCKER_CONTAINER_NAME $DOCKER_IMAGE_NAME
+
+  stop:
+    cmds:
+      - cmd: docker stop $DOCKER_CONTAINER_NAME &> /dev/null
+        ignore_error: true
+
+  rerun:
+    cmds:
+      - task: stop
+      - task: run
+
+  connect:
+    cmds:
+      - docker exec -it $DOCKER_CONTAINER_NAME /bin/sh
+
+  test:
+    cmds:
+      - go clean -testcache
+      - go test -v ./...
+
+  release:
+    cmds:
+      - |
+        GITHUB_BUILD_ID={{.CLI_ARGS}} \
+        && BASE_IMAGE=$(cat Dockerfile | grep FROM | cut -d ' ' -f 2 | sed 's/:/-/g') \
+        && IMAGE_TO_PUSH=$DOCKER_REPOSITORY/$DOCKER_IMAGE_NAME:$BASE_IMAGE-${GITHUB_BUILD_ID:-dev} \
+        && docker tag $DOCKER_IMAGE_NAME $IMAGE_TO_PUSH \
+        && docker push $IMAGE_TO_PUSH
+
+  pre:
+    cmds:
+      - task: format
+      - task: lint
+      - task: build
+      - task: rerun
+      - task: test
+      - task: stop
