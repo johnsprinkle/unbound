@@ -8,7 +8,8 @@ import (
 
 func TestDNSLookup(t *testing.T) {
 	var dig dnsutil.Dig
-	dig.At("127.0.0.1:5053")
+	err := dig.At("127.0.0.1:5053")
+	handleError(err)
 	a, err := dig.A("google.com")
 	handleError(err)
 

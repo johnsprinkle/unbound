@@ -60,6 +60,7 @@ tasks:
   pre:
     cmds:
       - task: format
+      - task: lint
       - task: build
       - task: rerun
       - task: test
