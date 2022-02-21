@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "08:00"
+      day: "thursday"
+      timezone: "America/New_York"
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "08:00"
+      day: "thursday"
+      timezone: "America/New_York"
