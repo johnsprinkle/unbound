@@ -3,8 +3,6 @@ name: Docker Image CI
 on:
   push:
   pull_request:
-  schedule:
-    - cron: '0 0 * * 6' # Every Saturday at midnight
 
 jobs:
   lint:

@@ -52,10 +52,12 @@ tasks:
 
   release:
     cmds:
-      - GITHUB_BUILD_ID={{.CLI_ARGS}} && docker tag $DOCKER_IMAGE_NAME $DOCKER_REPOSITORY/$DOCKER_IMAGE_NAME:${GITHUB_BUILD_ID:-dev}
-      - GITHUB_BUILD_ID={{.CLI_ARGS}} && docker push $DOCKER_REPOSITORY/$DOCKER_IMAGE_NAME:${GITHUB_BUILD_ID:-dev}
-      - docker tag $DOCKER_IMAGE_NAME $DOCKER_REPOSITORY/$DOCKER_IMAGE_NAME:latest
-      - docker push $DOCKER_REPOSITORY/$DOCKER_IMAGE_NAME:latest
+      - |
+        GITHUB_BUILD_ID={{.CLI_ARGS}} \
+        && BASE_IMAGE=$(cat Dockerfile | grep FROM | cut -d ' ' -f 2 | sed 's/:/-/g') \
+        && IMAGE_TO_PUSH=$DOCKER_REPOSITORY/$DOCKER_IMAGE_NAME:$BASE_IMAGE-${GITHUB_BUILD_ID:-dev} \
+        && docker tag $DOCKER_IMAGE_NAME $IMAGE_TO_PUSH \
+        && docker push $IMAGE_TO_PUSH
 
   pre:
     cmds:
