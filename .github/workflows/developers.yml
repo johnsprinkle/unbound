@@ -6,6 +6,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -17,6 +18,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - name: Install Task
         uses: arduino/setup-task@v1
