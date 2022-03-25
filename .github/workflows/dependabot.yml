@@ -57,7 +57,6 @@ jobs:
         with:
           github-token: "${{ secrets.DEPENDABOT_PAT }}"
       - name: Enable auto-merge for Dependabot PRs
-        if: ${{contains(steps.metadata.outputs.dependency-names, 'alpine') }}
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
